@@ -213,7 +213,7 @@ body::after{
   </div>
   <div class="sr-wrap">
     <span class="ic">🔍</span>
-    <input id="q" placeholder="搜职位、公司、技能..." aria-label="搜索职位" oninput="R()">
+    <input id="q" placeholder="搜职位、公司、技能..." aria-label="搜索职位" oninput="debounceR()">
   </div>
   <div class="st" id="st"></div>
 </div>
@@ -348,7 +348,12 @@ function salSl(s){
   return '0';
 }
 
+var PAGE=50,SHOWN=0,searchTimer=null;
+function debounceR(){clearTimeout(searchTimer);searchTimer=setTimeout(function(){SHOWN=0;R();},250);}
 function R(){
+  if(SHOWN===0){
+    var el=document.getElementById("ls");el.innerHTML="";el.scrollTop=0;
+  }
   var q=(document.getElementById('q').value||'').toLowerCase();
   var L=D.slice();
   if(CF!=='全部')L=L.filter(function(j){return (j.src||'')===CF;});
@@ -405,7 +410,14 @@ function R(){
        '<div class="r3">'+meta+'</div>'+skh+
        '<div class="ft"><span class="tm '+tc+'">'+tm+'</span>'+(trackTag||'<span>'+(j.st||'')+'</span>')+'</div></div>';
   }
-  el.innerHTML=h;
+  if(SHOWN===0)el.innerHTML=h;
+  else el.insertAdjacentHTML("beforeend",h);
+  SHOWN=max;
+  if(SHOWN<L.length){
+    var sent=document.createElement("div");sent.id="sentinel";sent.style.height="10px";el.appendChild(sent);
+    var obs=new IntersectionObserver(function(e){if(e[0].isIntersecting){sent.remove();R();}});
+    obs.observe(sent);
+  }
 }
 
 function dateDiff(a,b){
