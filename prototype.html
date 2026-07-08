@@ -535,9 +535,20 @@ function OM(i){
 
 function applyJob(btn, i){
   var j=CL[i];if(!j)return;
-  // B10 修复：用 toast 替代 alert
-  showToast('正在跳转到 BOSS直聘 · '+(j.b||''));
-  // 实际场景：window.open(j.url, '_blank');
+  var url = j.lk || j.url || '';
+  if(url && url !== '#'){
+    // 移动端兼容：优先用 a 标签点击（微信内也可用）
+    var a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('正在打开 BOSS直聘...');
+  } else {
+    showToast('暂无投递链接');
+  }
 }
 
 // Toast 提示
